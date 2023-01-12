@@ -84,9 +84,10 @@ class ToTensor:
 LR = 1e-3
 num_classes = 2
 batch_size = 16
-start_epoch, max_epoch = 1, 20
+start_epoch, max_epoch = 1, 30
 vis_num = 20
 transform = Compose([ToTensor(), RandomHorizontalFlip(0.5)])
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')
 # classes_coco
 COCO_INSTANCE_CATEGORY_NAMES = [

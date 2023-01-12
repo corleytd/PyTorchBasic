@@ -27,7 +27,7 @@ from tools.datasets import RMBDataset
 
 set_seed()
 
-flag = 7
+flag = 9
 
 # 1.path
 if flag == 0:

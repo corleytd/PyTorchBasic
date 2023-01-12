@@ -17,7 +17,7 @@ from torchvision.utils import make_grid
 from models.dcgan import Generator
 from tools.common_tools import set_seed
 
-set_seed()
+set_seed(65535)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 ckpt_path = 'output/gan_log/checkpoint_epoch_20.ckpt'
@@ -27,14 +27,15 @@ image_size = 64
 image_num = 64
 nc = 3
 nz = 100
-ngf = 128
-ndf = 128
+ngf = 64
+ndf = 64
 transform = transforms.Compose([
     transforms.Resize(image_size),
+    transforms.CenterCrop(image_size),
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # (-1, 1)
 ])
-add_noise = True
+add_noise = False
 
 # 1.生成数据
 fixed_noise = torch.randn(image_num, nz, 1, 1, device=device)

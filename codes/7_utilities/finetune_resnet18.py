@@ -72,6 +72,7 @@ resnet = models.resnet18()
 
 # 2.2 加载预训练参数
 if use_fine_tune:
+    # 下载地址：https://download.pytorch.org/models/resnet18-5c106cde.pth
     pretrained_resnet_path = '../../data/pretrained_models/resnet18.pth'
     state_dict = torch.load(pretrained_resnet_path)
     resnet.load_state_dict(state_dict)

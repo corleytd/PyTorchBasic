@@ -78,7 +78,7 @@ OrderedDict([('linears.0.weight', tensor([[ 0.4414,  0.4792, -0.1353],
 # 2.多GPU场景保存模型
 if flag == 1:
     if torch.cuda.device_count() < 2:
-        print('GPU数量不足，青岛多GPU环境下运行')
+        print('GPU数量不足，请到多GPU环境下运行')
         sys.exit(0)
 
     gpus = [0, 1, 2, 3]

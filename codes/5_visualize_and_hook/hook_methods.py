@@ -125,13 +125,14 @@ if flag == 2:
 
     # 注册hook
     net.conv.register_forward_pre_hook(forward_pre_hook)
-    net.conv.register_backward_hook(backward_hook)
+    # net.conv.register_backward_hook(backward_hook)  # 已弃用
+    net.conv.register_full_backward_hook(backward_hook)
 
     # 前向传播
     fake_img = torch.ones((1, 1, 4, 4))  # BCHW
     output = net(fake_img)
     target = torch.randn_like(output)
 
-    loss_func = nn.NLLLoss()
+    loss_func = nn.L1Loss()
     loss = loss_func(target, output)
     loss.backward()

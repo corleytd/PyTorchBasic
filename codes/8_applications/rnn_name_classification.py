@@ -172,7 +172,7 @@ plt.plot(losses)
 plt.show()
 
 # 5.预测
-predict('Yue Tingsong', model)
-predict('Yu tingsong', model)
-predict('yutingsong', model)
+predict('Yolande', model)
+predict('Aurora', model)
+predict('Valentina', model)
 predict('Corley Tang', model)

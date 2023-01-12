@@ -38,16 +38,17 @@ log_interval = 10
 image_size = 64
 nc = 3
 nz = 100
-ngf = 128
-ndf = 128
+ngf = 64
+ndf = 64
 num_epochs = 20
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
-real_idx, fake_idx = 0.9, 0.1
+real_idx, fake_idx = 0.9, 0.1  # 1, 0
 lr = 2e-4
-batch_size = 512
+batch_size = 256
 beta1 = 0.5
 transform = transforms.Compose([
     transforms.Resize(image_size),
+    transforms.CenterCrop(image_size),
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # (-1, 1)
 ])
@@ -85,6 +86,9 @@ losses_gen, losses_dis = [], []
 for epoch in range(1, num_epochs + 1):
     for iteration, images in enumerate(train_loader, 1):
         # 5.1 训练判别器
+        # 清空梯度
+        discriminator.zero_grad()
+
         cur_batch_size = images.size(0)
         real_img = images.to(device)
         real_label = torch.full((cur_batch_size,), real_idx, dtype=torch.float, device=device)
@@ -113,10 +117,10 @@ for epoch in range(1, num_epochs + 1):
         d_x = out_dis_real.mean().item()  # D(x)
         d_g_z1 = out_dis_fake.mean().item()  # D(G(z1))
 
-        # 清空梯度
-        discriminator.zero_grad()
-
         # 5.2 训练生成器
+        # 清空梯度
+        generator.zero_grad()
+
         label_for_train_gen = real_label
         out_dis_fake_2 = discriminator(fake_img)
 
@@ -130,12 +134,9 @@ for epoch in range(1, num_epochs + 1):
         # 记录概率
         d_g_z2 = out_dis_fake_2.mean().item()  # D(G(z2))
 
-        # 清空梯度
-        generator.zero_grad()
-
         if iteration % log_interval == 0:
             print(
-                f'Epoch: [{epoch:0>3}/{num_epochs:0>3}] Iteration: [{iteration:0>3}/{train_count:0>3}] Loss_Dis: {loss_dis.item():.4f} Loss_Gen: {loss_gen.item():.4f} D(x): {d_x:.4f} D(G(z)): {d_g_z1:.4f} / {d_g_z2:.4f}')
+                f'Epoch: [{epoch:0>3}/{num_epochs:0>3}] Iteration: [{iteration:0>3}/{train_count:0>3}] Loss_Dis: {loss_dis.item():.4f} Loss_Gen: {loss_gen.item():7.4f} D(x): {d_x:.4f} D(G(z)): {d_g_z1:.4f} / {d_g_z2:.4f}')
 
         # 保存损失
         losses_gen.append(loss_gen.item())

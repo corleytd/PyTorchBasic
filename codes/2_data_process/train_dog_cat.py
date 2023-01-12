@@ -25,7 +25,7 @@ set_seed()  # 设置随机种子
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 设置超参数
-MAX_EPOCH = 20
+MAX_EPOCH = 30
 BATCH_SIZE = 512
 lr = 1e-3
 log_interval = 10
@@ -41,7 +41,9 @@ norm_std = [0.229, 0.224, 0.225]
 
 train_transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.RandomCrop(224, padding=4),
+    transforms.RandomHorizontalFlip(0.5),
+    transforms.RandomApply([transforms.RandomCrop(200, padding=24, padding_mode='reflect')], p=0.2),
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(norm_mean, norm_std)
 ])
@@ -67,7 +69,7 @@ lenet.to(device)
 criterion = nn.CrossEntropyLoss()
 
 # 4.定义优化器
-optimizer = optim.Adam(lenet.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-1)
+optimizer = optim.Adam(lenet.parameters(), lr=lr, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.1)
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
 # 5.训练
@@ -79,6 +81,9 @@ for epoch in range(1, MAX_EPOCH + 1):
 
     lenet.train()
     for iteration, data in enumerate(train_loader, 1):
+        # 梯度清零
+        optimizer.zero_grad()
+
         # 前向传播
         inputs, labels = data
         inputs, labels = inputs.to(device), labels.to(device)
@@ -92,9 +97,6 @@ for epoch in range(1, MAX_EPOCH + 1):
 
         # 更新参数
         optimizer.step()
-
-        # 梯度清零
-        optimizer.zero_grad()
 
         # 统计结果
         _, preds = torch.max(outputs, 1)
@@ -133,7 +135,8 @@ for epoch in range(1, MAX_EPOCH + 1):
 
             avg_val_loss = val_loss / len(valid_loader)
             valid_curve.append(avg_val_loss)
-            print(f'Valid: Epoch: {epoch:0>3}/{MAX_EPOCH:0>3} Loss: {avg_loss:.4f} Acc: {val_correct / val_total:.2%}')
+            print(
+                f'Valid: Epoch: {epoch:0>3}/{MAX_EPOCH:0>3} Loss: {avg_val_loss:.4f} Acc: {val_correct / val_total:.2%}')
 
 # 画图
 train_res_x = range(len(train_curve))
@@ -159,18 +162,52 @@ test_loader = DataLoader(test_data, batch_size=BATCH_SIZE * 2)
 
 test_correct, test_total, test_loss = 0, 0, 0
 
-for iteration, data in enumerate(test_loader):
-    # 前向
-    inputs, labels = data
-    inputs, labels = inputs.to(device), labels.to(device)
-    outputs = lenet(inputs)
-    loss = criterion(outputs, labels)
+lenet.eval()
+with torch.no_grad():
+    for iteration, data in enumerate(test_loader):
+        # 前向
+        inputs, labels = data
+        inputs, labels = inputs.to(device), labels.to(device)
+        outputs = lenet(inputs)
+        loss = criterion(outputs, labels)
 
-    _, preds = torch.max(outputs, 1)
-    test_total += labels.size(0)
-    test_correct += (preds == labels).squeeze().sum().item()
+        _, preds = torch.max(outputs, 1)
+        test_total += labels.size(0)
+        test_correct += (preds == labels).squeeze().sum().item()
 
-    test_loss += loss.item()
+        test_loss += loss.item()
 
 avg_test_loss = test_loss / len(test_loader)
 print(f'Test: Loss: {avg_test_loss:.4f} Acc: {test_correct / test_total:.2%}')
+
+'''
+训练结果示意如下：
+Train: Epoch: 026/030 Iteration: 010/040 Loss: 0.1887 Acc: 93.85%
+Train: Epoch: 026/030 Iteration: 020/040 Loss: 0.1781 Acc: 93.94%
+Train: Epoch: 026/030 Iteration: 030/040 Loss: 0.1830 Acc: 93.93%
+Train: Epoch: 026/030 Iteration: 040/040 Loss: 0.1732 Acc: 94.00%
+Valid: Epoch: 026/030 Loss: 0.2218 Acc: 91.12%
+Train: Epoch: 027/030 Iteration: 010/040 Loss: 0.1801 Acc: 94.16%
+Train: Epoch: 027/030 Iteration: 020/040 Loss: 0.1716 Acc: 94.38%
+Train: Epoch: 027/030 Iteration: 030/040 Loss: 0.1817 Acc: 94.17%
+Train: Epoch: 027/030 Iteration: 040/040 Loss: 0.1781 Acc: 94.25%
+Valid: Epoch: 027/030 Loss: 0.2116 Acc: 91.84%
+Train: Epoch: 028/030 Iteration: 010/040 Loss: 0.1788 Acc: 94.08%
+Train: Epoch: 028/030 Iteration: 020/040 Loss: 0.1827 Acc: 94.05%
+Train: Epoch: 028/030 Iteration: 030/040 Loss: 0.1715 Acc: 94.27%
+Train: Epoch: 028/030 Iteration: 040/040 Loss: 0.1821 Acc: 94.36%
+Valid: Epoch: 028/030 Loss: 0.2231 Acc: 91.28%
+Train: Epoch: 029/030 Iteration: 010/040 Loss: 0.1777 Acc: 94.12%
+Train: Epoch: 029/030 Iteration: 020/040 Loss: 0.1671 Acc: 94.42%
+Train: Epoch: 029/030 Iteration: 030/040 Loss: 0.1718 Acc: 94.50%
+Train: Epoch: 029/030 Iteration: 040/040 Loss: 0.1778 Acc: 94.50%
+Valid: Epoch: 029/030 Loss: 0.2083 Acc: 91.44%
+Train: Epoch: 030/030 Iteration: 010/040 Loss: 0.1732 Acc: 94.39%
+Train: Epoch: 030/030 Iteration: 020/040 Loss: 0.1663 Acc: 94.64%
+Train: Epoch: 030/030 Iteration: 030/040 Loss: 0.1661 Acc: 94.73%
+Train: Epoch: 030/030 Iteration: 040/040 Loss: 0.1611 Acc: 94.78%
+Valid: Epoch: 030/030 Loss: 0.2152 Acc: 91.68%
+Test: Loss: 0.2007 Acc: 92.56%
+
+可以看到，最后在验证集上的结果精确度为91.68%、测试集上的结果为92.56%，已经有不错的效果
+'''

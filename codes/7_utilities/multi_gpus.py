@@ -83,7 +83,7 @@ if flag == 1:
         output = model(inputs)
         print(f'model output.shape: {output.shape}')
 
-    print(f'\nCUDA_VISIBLE_DEVICES: {os.environ["CUDA_VISIBLE_DEVICES"]}')
+    print(f'\nCUDA_VISIBLE_DEVICES: {os.environ.get("CUDA_VISIBLE_DEVICES", None)}')
     print(f'device_count: {torch.cuda.device_count()}')
 
 '''

@@ -15,7 +15,7 @@ class Generator(nn.Module):
     def __init__(self, nz=100, ngf=128, nc=3):
         super().__init__()
         self.backbone = nn.Sequential(
-            # input z going to convolution
+            # input z into convolution
             # state size: (ngf*8, 4, 4)
             nn.ConvTranspose2d(nz, ngf * 8, 4, 1, 0, bias=False),
             nn.BatchNorm2d(ngf * 8),
@@ -42,10 +42,10 @@ class Generator(nn.Module):
 
     def initialize_weights(self, c_mean=0, c_std=0.02, b_mean=1, b_std=0.02):
         for m in self.modules():
-            classname = m.__class__.__name__
-            if classname.find('Conv') != -1:
+            module_name = m._get_name()
+            if 'Conv' in module_name:
                 nn.init.normal_(m.weight.data, c_mean, c_std)
-            elif classname.find('BatchNorm') != -1:
+            elif 'BatchNorm' in module_name:
                 nn.init.normal_(m.weight.data, b_mean, b_std)
                 nn.init.constant_(m.bias.data, 0)
 
