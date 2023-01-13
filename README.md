@@ -98,19 +98,32 @@ Complete dependencies can be installed by executing the command `pip install -r 
 
 The following are some running examples:
 
-- Cat and Dog Classification with LeNet
+- Loss Curve of Cat and Dog Classification with LeNet
+  
   ![lenet_cat_dog](assets/lenet_cat_dog.png)
+
 - Weight of Convolution Layer in LeNet from Tensorboard
+  
   ![lenet_tensorboard](assets/lenet_tensorboard.png)
+
 - Ant and Bee Classification with ResNet
+  
   ![resnet_ant_bee](assets/resnet_ant_bee.png)
+
 - Portrait Matting with UNet
+  
   ![unet_portrait_matting](assets/unet_portrait_matting.png)
+
 - Object Detection with FasterRCNN
+  
   ![fasterrcnn_detection](assets/fasterrcnn_detection.png)
+
 - Face Generation with GAN
+  
   ![gan_face_generation](assets/gan_face_generation.gif)
+
 - Name Classification with RNN
+  
   ![rnn_name_classification](assets/rnn_name_classification.png)
 
 ## Data
